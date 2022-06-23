@@ -2,11 +2,14 @@ package top.xinsin;
 
 import com.aliyun.alidns20150109.Client;
 import lombok.extern.slf4j.Slf4j;
+import top.xinsin.timer.DDNSTimer;
 import top.xinsin.util.InitClient;
 
 import java.io.File;
 import java.io.FileReader;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Slf4j
 public final class Launch {
@@ -23,20 +26,12 @@ public final class Launch {
         String accessKeySecret = properties.getProperty("accessKeySecret");
         String endpoint = properties.getProperty("endpoint");
         String domainName = properties.getProperty("DomainName");
+        String mark = properties.getProperty("mark");
         InitClient initClient = new InitClient();
         Client client = initClient.createClient(accessKeyId, accessKeySecret, endpoint);
-        while (true) {
-            try {
-                log.info("正在执行中更改ip接口!!");
-                initClient.run(client, domainName);
-                Thread.sleep(1000*60);
-            }catch (InterruptedException e){
-                //
-                break;
-            }catch (Exception e) {
-                e.printStackTrace();
-                log.error("执行更改ip接口出现未知错误!");
-            }
-        }
+        TimerTask ddnsTimer = new DDNSTimer(client, domainName, mark);
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(ddnsTimer,1000L,1000 * 60);
+
     }
 }

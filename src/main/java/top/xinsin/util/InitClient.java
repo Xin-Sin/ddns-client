@@ -17,7 +17,7 @@ import java.util.List;
 public class InitClient {
     private int num;
     @SneakyThrows
-    public void run(Client client,String DomainName){
+    public void run(Client client,String DomainName,String mark){
         HashMap<String, String> objectObjectHashMap = new HashMap<>();
         objectObjectHashMap.put("DomainName",DomainName);
         DescribeDomainRecordsRequest build = DescribeDomainRecordsRequest.build(objectObjectHashMap);
@@ -25,7 +25,7 @@ public class InitClient {
         JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(describeDomainRecordsResponse.body));
         List<Record> records = JSON.parseArray(jsonObject.getJSONObject("domainRecords").getJSONArray("record").toJSONString(), Record.class);
         for (Record r : records) {
-            if ("thisMark".equals(r.getRemark())) {
+            if (mark.equals(r.getRemark())) {
                 // TODO: 6/19/22 此处写替换逻辑
                 Record recordInfo = getRecordInfo(client, r.getRecordId());
                 String localIp = IP.getLocalIp();
@@ -40,8 +40,6 @@ public class InitClient {
                         } else {
                             log.error("更换失败,请联系xinxin进行抢修(还是别联系了!!!!!!!!)");
                         }
-                    } else {
-                        log.warn("检测ip没有更换,跳过!");
                     }
                 }
             }
